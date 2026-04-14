@@ -1,0 +1,38 @@
+id: kael-ranger-01
+name: Kael
+domain: game-character
+style_family: dark-fantasy concept art
+
+identity_anchors:
+  face_identity:
+    priority: 1.0
+    description: angular face, narrow nose, calm stern eyes
+  hairstyle:
+    priority: 0.95
+    description: shoulder-length dark hair, tied loosely back
+  silhouette:
+    priority: 0.85
+    description: lean athletic build, long coat outline
+  world_continuity:
+    priority: 0.7
+    description: ruined ancient world, cold desaturated atmosphere
+  art_style_consistency:
+    priority: 0.9
+    description: painterly high-end concept art, realistic proportions
+
+locked_attributes:
+  - facial structure
+  - hair shape
+  - body proportions
+  - signature costume outline
+
+soft_attributes:
+  - pose
+  - scene composition
+  - lighting angle
+
+negative_constraints:
+  - cartoon proportions
+  - sci-fi armor
+  - modern clothing
+  - anime facial simplification

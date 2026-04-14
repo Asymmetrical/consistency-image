@@ -1,0 +1,35 @@
+id: character-schema-v0
+name: Character Schema
+description: Defines a recurring character spec for consistency testing.
+
+fields:
+  id: string
+  name: string
+  domain: string # e.g., game-character, photorealistic
+  style_family: string # e.g., dark-fantasy concept art
+  
+  identity_anchors:
+    face_identity:
+      priority: number (0.0 - 1.0)
+      description: string
+    hairstyle:
+      priority: number (0.0 - 1.0)
+      description: string
+    silhouette:
+      priority: number (0.0 - 1.0)
+      description: string
+    world_continuity:
+      priority: number (0.0 - 1.0)
+      description: string
+    art_style_consistency:
+      priority: number (0.0 - 1.0)
+      description: string
+  
+  locked_attributes:
+    - string
+  
+  soft_attributes:
+    - string
+  
+  negative_constraints:
+    - string

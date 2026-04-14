@@ -1,0 +1,22 @@
+id: experiment-schema-v0
+name: Experiment Schema
+description: Defines a single experiment run consisting of multiple benchmark cases.
+
+fields:
+  id: string
+  generator: string # e.g., flux-dev-baseline
+  benchmark_set:
+    - string (referencing benchmark IDs or set manifests)
+  samples_per_case: integer
+  
+  generation_settings:
+    steps: integer
+    guidance: number
+    seed_mode: string # e.g., fixed-per-case, random
+  
+  evaluation_profile: string # references an evaluator profile
+  
+  goal:
+    primary: string
+    secondary:
+      - string

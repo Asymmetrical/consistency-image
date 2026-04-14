@@ -1,0 +1,19 @@
+name: default-character-v1
+description: Standard weights and thresholds for character consistency evaluation.
+
+weights:
+  face_identity: 0.30
+  hairstyle: 0.20
+  silhouette: 0.20
+  world_continuity: 0.10
+  art_style_consistency: 0.20
+
+pass_thresholds:
+  face_identity: 0.80
+  hairstyle: 0.75
+  silhouette: 0.72
+  art_style_consistency: 0.78
+
+report:
+  include_failure_modes: true
+  include_ranked_outputs: true

@@ -1,0 +1,15 @@
+id: benchmark-schema-v0
+name: Benchmark Case Schema
+description: Defines a single benchmark case for consistency evaluation.
+
+fields:
+  id: string
+  character_id: string
+  references:
+    - string (path to image)
+  task_prompt: string
+  expected_invariants:
+    - string (referencing character identity anchors)
+  allowed_variations:
+    - string
+  evaluation_profile: string # references an evaluator profile

@@ -1,0 +1,37 @@
+- id: bench-kael-temple-torchlight
+  character_id: kael-ranger-01
+  ref_strategy: lora_hybrid
+  references:
+    - data/characters/kael/ref_01.png
+    - data/characters/kael/ref_02.png
+    - data/characters/kael/ref_03_profile.png
+    - data/characters/kael/ref_04_silhouette.png
+  task_prompt: "Kael standing in a ruined temple lit by torchlight"
+  expected_invariants:
+    - face_identity
+    - hairstyle
+    - silhouette
+    - art_style_consistency
+  allowed_variations:
+    - pose
+    - framing
+    - lighting nuance
+  evaluation_profile: default-character-v1
+
+- id: bench-kael-forest-watch
+  character_id: kael-ranger-01
+  ref_strategy: lora_hybrid
+  references:
+    - data/characters/kael/ref_01.png
+    - data/characters/kael/ref_03_profile.png
+  task_prompt: "Kael keeping watch in a dense foggy forest, hand on sword hilt"
+  expected_invariants:
+    - face_identity
+    - hairstyle
+    - silhouette
+    - art_style_consistency
+  allowed_variations:
+    - pose
+    - environment
+    - fog density
+  evaluation_profile: default-character-v1

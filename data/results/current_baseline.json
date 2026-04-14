@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-772",
+  "total_score": 0.91,
+  "dimensions": {
+    "face_identity": 0.915,
+    "hairstyle": 0.95,
+    "silhouette": 0.885,
+    "world_continuity": 0.885,
+    "art_style_consistency": 0.9
+  },
+  "timestamp": "2026-04-14T15:34:34.163063",
+  "commit_hash": "stub"
+}
