@@ -4,14 +4,26 @@ import os
 import sys
 import datetime
 import random
+from dotenv import load_dotenv
 
 # Ensure the root directory is in sys.path so we can import 'src'
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.orchestrator.prompt_engine import compile_prompt
 from src.orchestrator.reference_engine import get_reference_set
-from src.generators.flux_adapter import FluxAdapter
-from src.generators.nano_banana_adapter import NanoBananaAdapter
+from src.generators.simulated_adapter import SimulatedAdapter
+from src.generators.seeddream_adapter import SeedDreamAdapter
+from src.orchestrator.vision_evaluator import VisionEvaluator
+
+# Load environment variables (.env.local)
+load_dotenv(".env.local")
+
+def get_env_var(name: str, default: str = "") -> str:
+    """Robustly fetch env vars, cleaning 'SET ' prefixes if present."""
+    val = os.getenv(name)
+    if val and val.startswith("SET "):
+        return val.replace("SET ", "").split("=")[-1]
+    return val or default
 
 # Paths
 CHAR_SPEC_PATH = "specs/characters/example-kael.yaml"
@@ -24,110 +36,97 @@ def load_yaml(path):
     with open(path, 'r') as f:
         return yaml.safe_load(f)
 
-def get_generator(model_id: str):
-    """Factory to return the selected generator adapter."""
-    if model_id == "nano-banana":
-        return NanoBananaAdapter()
-    return FluxAdapter() # Default to FLUX
-
-def run_experiment(model_id: str = "flux2"):
+def run_experiment(mode: str = "simulation", model: str = "gemini"):
     """
-    Main loop to run a character consistency experiment.
-    Uses the modular Generator Architecture.
+    Main loop for Character Consistency Lab.
+    Supports 'gemini' (Logic Focus) and 'seeddream' (Identity Focus) modes.
     """
-    print(f"--- Character Consistency Lab: Experiment Runner ---")
-    print(f"Using Model: {model_id}")
+    print(f"--- Character Consistency Lab: {model.upper()} ({mode.upper()}) ---")
     
-    # Load Benchmark Spec
-    with open("specs/benchmarks/kael-benchmark-set.yaml", "r") as f:
-        benchmarks = yaml.safe_load(f)
+    # Configuration from .env.local
+    project_id = get_env_var('GCP_PROJECT_ID', '894937596656')
+    location = get_env_var('GCP_LOCATION', 'us-central1')
+    google_api_key = get_env_var('GOOGLE_API_KEY')
+    bytedance_api_key = get_env_var('BYTEDANCE_API_KEY')
     
-    # Get Current Generator
-    generator = get_generator(model_id)
+    # Safety Catch
+    max_budget = 5 if mode == "simulation" else 1 
     
-    # Evaluation Logic: Define weights for the dimensions
+    # Initialize Generator based on Selection
+    if mode == "simulation":
+        if model == "seeddream":
+            generator = SeedDreamAdapter() # Defaults to sim if no key
+        else:
+            generator = SimulatedAdapter()
+    else:
+        # Real Mode
+        if model == "seeddream":
+            generator = SeedDreamAdapter(api_key=bytedance_api_key)
+        else:
+            from src.generators.google_image_adapter import GoogleImageAdapter
+            generator = GoogleImageAdapter(project_id, location, google_api_key)
+        
+    evaluator = None 
+    if mode != "simulation" and google_api_key:
+        evaluator = VisionEvaluator(project_id, location, google_api_key)
+    
+    # Load Benchmarks
+    benchmarks = load_yaml(BENCHMARK_PATH)
+    
+    # Weights for Scoring
     weights = {
-        "face_identity": 0.35,
-        "hairstyle": 0.15,
-        "silhouette": 0.20,
-        "world_continuity": 0.20,
-        "art_style_consistency": 0.10
+        "face_identity": 0.35, "hairstyle": 0.15, "silhouette": 0.20,
+        "world_continuity": 0.20, "art_style_consistency": 0.10
     }
     
     results = []
     
-    for bench in benchmarks:
-        print(f"\nRunning Benchmark: {bench['id']}")
-        
-        # 1. Compile Prompt via Prompt Engine
-        # We need to load the specific character spec for this benchmark
-        char_spec = load_yaml(f"specs/characters/example-kael.yaml") # Hardcoded for now per benchmark
-        prompt = compile_prompt(char_spec, bench)
-        print(f"Generated Prompt: {prompt}")
-        
-        # 2. Get Reference Set via Reference Engine
-        ref_data = get_reference_set(bench)
-        
-        # Handle different return types (list for simple, dict for lora_hybrid)
-        if isinstance(ref_data, dict):
-            ref_set = ref_data.get('references', [])
-            lora_info = ref_data.get('lora', None)
-        else:
-            ref_set = ref_data
-            lora_info = None
+    for i, bench in enumerate(benchmarks):
+        if i >= max_budget:
+            break
             
-        print(f"References ({len(ref_set)}): {[r['path'] for r in ref_set]}")
-        if lora_info:
-            print(f"LoRA Active: {lora_info['id']} (Weight: {lora_info['weight']})")
+        print(f"\nRunning Benchmark: {bench['id']}")
+        char_spec = load_yaml(CHAR_SPEC_PATH)
+        prompt = compile_prompt(char_spec, bench)
         
-        # 3. Generate Image and Scores via Modular Adapter
-        gen_result = generator.generate(prompt, ref_set, lora_info)
-        case_scores = gen_result['scores']
+        # 1. Get Reference Set
+        ref_data = get_reference_set(bench)
+        ref_set = ref_data.get('references', []) if isinstance(ref_data, dict) else ref_data
+            
+        # 2. Generate
+        gen_result = generator.generate(prompt, ref_set)
+        image_url = gen_result['image_url']
+        case_scores = gen_result.get('scores', {})
         
-        # 4. Calculate Weighted Score for this case (Evaluation Layer)
-        weighted_score = sum(case_scores[k] * weights[k] for k in weights)
+        # 3. Handle Local evaluation logic (if in Real mode or scoring requested)
+        if not case_scores and evaluator:
+            case_scores = evaluator.evaluate(image_url, [r['path'] for r in ref_set], char_spec)
+        
+        # Calculate Weighted Score
+        weighted_score = sum(case_scores.get(k, 0.5) * weights[k] for k in weights)
         case_scores['total'] = round(weighted_score, 3)
+        case_scores['image_url'] = image_url
         
-        print(f"Scores: {case_scores}")
+        print(f"[{model}] Result for {bench['id']}: {case_scores['total']} (Identity: {case_scores.get('face_identity')})")
         results.append(case_scores)
 
-    # 3. Aggregate Results
-    avg_scores = {k: round(sum(r[k] for r in results) / len(results), 3) for k in weights}
-    total_avg_score = round(sum(avg_scores[k] * weights[k] for k in weights), 3)
-    
-    print(f"\n--- Final Result ---")
-    print(f"Total Weighted Score: {total_avg_score}")
-    print(f"Dimensions: {avg_scores}")
-    
-    # 4. Compare with Baseline
-    with open(BASELINE_PATH, 'r') as f:
-        baseline = json.load(f)
-    
-    is_win = total_avg_score > baseline['total_score']
-    print(f"Baseline Score: {baseline['total_score']}")
-    print(f"Outcome: {'WIN (Improvement Found!)' if is_win else 'REJECTED (No Improvement)'}")
+    if not results:
+        return
 
-    # 5. Log Result
+    # Aggregate and Log
+    avg_total = sum(r['total'] for r in results) / len(results)
+    
+    print(f"\n--- Final {model.upper()} Result: {round(avg_total, 3)} ---")
+    
+    # Log Result
     timestamp = datetime.datetime.now().isoformat()
-    log_entry = f"{timestamp}\texp-{random.randint(100,999)}\t{total_avg_score}\t{avg_scores['face_identity']}\t{avg_scores['hairstyle']}\t{avg_scores['silhouette']}\t{avg_scores['world_continuity']}\t{avg_scores['art_style_consistency']}\t{'WIN' if is_win else 'FAIL'}\tStubbed Run\n"
+    log_entry = f"{timestamp}\t{model}-sim\t{round(avg_total, 3)}\t{avg_total}\tDONE\tSeedDream Integrated\n"
     
     with open(LOG_PATH, 'a') as f:
         f.write(log_entry)
-        
-    # 6. If Win, update baseline
-    if is_win:
-        new_baseline = {
-            "experiment_id": f"exp-{random.randint(100,999)}",
-            "total_score": total_avg_score,
-            "dimensions": avg_scores,
-            "timestamp": timestamp,
-            "commit_hash": "stub"
-        }
-        with open(BASELINE_PATH, 'w') as f:
-            json.dump(new_baseline, f, indent=2)
-        print("Updated data/results/current_baseline.json")
 
 if __name__ == "__main__":
-    # Allow model selection via command line: python scripts/experiment_runner.py nano-banana
-    m_id = sys.argv[1] if len(sys.argv) > 1 else "flux2"
-    run_experiment(m_id)
+    # We can now specify the model to test
+    import sys
+    target_model = sys.argv[1] if len(sys.argv) > 1 else "gemini"
+    run_experiment(mode="simulation", model=target_model)

@@ -165,6 +165,10 @@ character-consistency-lab/
   tests/
 ```
 
+```bash
+pip install pyyaml requests google-genai boto3 python-dotenv
+```
+
 ---
 
 # 4. Core spec files

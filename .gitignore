@@ -2,6 +2,7 @@
 
 # Environments
 .env
+.env.local
 .venv/
 env/
 venv/
@@ -48,3 +49,6 @@ artifacts/
 .idea/
 *.swp
 *.swo
+
+# External Repos
+virtuall-monorepo-develop/

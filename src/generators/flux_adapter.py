@@ -1,37 +1,59 @@
-import random
+import os
+import fal_client
 from typing import Dict, Any, List, Optional
 from .base import BaseGenerator
 
 class FluxAdapter(BaseGenerator):
     """
-    Adapter for FLUX.2 models (via fal.ai or Replicate).
-    Currently using the research simulator (Stub) for scoring.
+    Adapter for FLUX.2 models via fal.ai.
+    Uses real API calls and automated vision evaluation.
     """
     
     def generate(self, prompt: str, references: List[Dict[str, Any]], lora_metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        # Hypothesis: Diverse + Weighted references improve consistency.
-        # This stimulator logic was migrated from the main runner.
+        """
+        Generates an image using FLUX.2 on fal.ai.
+        """
+        print(f"--- fal.ai: Commencing Real Generation ---")
         
-        # Calculate bonus/recovery based on the strategy implied by the reference set
-        # (In a real adapter, this would call the API)
+        # 1. Prepare References (Upload local files to fal URLs)
+        image_urls = []
+        for ref in references:
+            path = ref['path']
+            if os.path.exists(path):
+                print(f"Uploading {path} to fal storage...")
+                url = fal_client.upload_file(path)
+                image_urls.append(url)
+            else:
+                print(f"Warning: Reference path {path} not found.")
+
+        # 2. Configure fal.ai Call
+        # We use the 'flux-2/edit' or similar endpoint for multi-reference
+        model_id = "fal-ai/flux-2/edit" 
         
-        # Determine strategy from reference structure
-        bonus = 0.05 if len(references) > 1 else 0.0
-        style_recovery = 0.10 if any(r.get('weight', 1.0) > 1.0 for r in references) else 0.0
+        arguments = {
+            "prompt": prompt,
+            "image_urls": image_urls[:4], # fal supports up to 4
+            "num_inference_steps": 28,
+            "guidance_scale": 3.5,
+        }
         
-        # Hybrid bonus if LoRA is present
-        hybrid_boost = 0.08 if lora_metadata else 0.0
+        # Handle LoRA weight if present
+        if lora_metadata:
+            # Note: Specific fal endpoints handle LoRAs differently. 
+            # This is a generic placeholder for the 'loras' schema.
+            arguments["loras"] = [{
+                "path": lora_metadata['id'],
+                "scale": lora_metadata['weight']
+            }]
+
+        # 3. Request Execution
+        print(f"Submitting to {model_id}...")
+        result = fal_client.subscribe(model_id, arguments=arguments, with_logs=True)
         
         return {
-            "image_url": "stub://flux2-output.png",
-            "scores": {
-                "face_identity": round(random.uniform(0.75 + hybrid_boost, 0.9 + bonus + hybrid_boost), 2),
-                "hairstyle": round(random.uniform(0.75 + hybrid_boost, 0.9 + bonus + hybrid_boost), 2),
-                "silhouette": round(random.uniform(0.75 + bonus + hybrid_boost/2, 0.9 + bonus), 2),
-                "world_continuity": round(random.uniform(0.75 + bonus, 0.9 + bonus), 2),
-                "art_style_consistency": round(random.uniform(0.7 + style_recovery, 0.9 + style_recovery), 2)
-            }
+            "image_url": result['images'][0]['url'],
+            "scores": {} # Scores will be populated by the VisionEvaluator later
         }
 
     def get_name(self) -> str:
-        return "FLUX.2 (Aesthetic Anchor)"
+        return "FLUX.2 (fal.ai)"
