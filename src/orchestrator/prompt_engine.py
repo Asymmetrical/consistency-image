@@ -3,10 +3,10 @@ Prompt Engine - Defines how character specs and benchmark tasks are Compiled int
 This file is a primary target for AI research and optimization.
 """
 
-def compile_prompt(character_spec, benchmark_task):
+def compile_prompt(character_spec, benchmark_task, references=None):
     """
     Assembles a prompt for image generation.
-    Updated for Imagen 3 consistency (Style Referencing).
+    Updated for Identity Locking: Detects high-weight 'Anchor' references.
     """
     
     # 1. Base identity anchors from YAML
@@ -19,17 +19,25 @@ def compile_prompt(character_spec, benchmark_task):
     # 2. Scene task
     task_prompt = benchmark_task.get('task_prompt', '')
     
-    # 3. Style and Constraints
+    # 3. Identify Lock Logic (Weighted Orchestration)
+    identity_lock = ""
+    if references:
+        # Sort to find the highest weight 'Anchor'
+        sorted_refs = sorted(references, key=lambda x: x.get('weight', 1.0), reverse=True)
+        top_ref = sorted_refs[0]
+        if top_ref.get('weight', 1.0) > 1.0:
+            # We explicitly tell the model that [1] is the source of truth for features.
+            identity_lock = f" CRITICAL: Precisely mirror the unique facial geometry and gaze of reference [1]."
+    
+    # 4. Style and Assembly
     style = character_spec.get('style_family', 'cinematic photography')
     
-    # 4. Final Assembly (The "Formula")
-    # Hypothesis: Explicitly linking to [1]-[4] reference tags improves consistency in Imagen 3.
     full_prompt = (
         f"A professional photo of {character_spec.get('name', 'character')}. "
         f"Physical traits: {identity_description}. "
         f"Style: {style}. "
         f"Action/Scene: {task_prompt}. "
-        f"Maintain strict consistency with the appearance and lighting shown in [1], [2], [3], and [4]."
+        f"{identity_lock} Use references [1]-[4] for overall consistency."
     )
     
     return full_prompt.strip()

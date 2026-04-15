@@ -35,3 +35,15 @@
     - environment
     - fog density
   evaluation_profile: default-character-v1
+
+- id: bench-kael-weighted-identity
+  character_id: kael-ranger-01
+  ref_strategy: weighted
+  references:
+    - data/characters/kael/ref_01.png
+    - data/characters/kael/ref_02.png
+    - data/characters/kael/ref_03_profile.png
+  task_prompt: "A close-up portrait of Kael in a library"
+  expected_invariants:
+    - face_identity
+  evaluation_profile: default-character-v1

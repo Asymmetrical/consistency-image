@@ -85,15 +85,15 @@ def run_experiment(mode: str = "simulation", model: str = "gemini"):
         if i >= max_budget:
             break
             
-        print(f"\nRunning Benchmark: {bench['id']}")
-        char_spec = load_yaml(CHAR_SPEC_PATH)
-        prompt = compile_prompt(char_spec, bench)
-        
         # 1. Get Reference Set
         ref_data = get_reference_set(bench)
         ref_set = ref_data.get('references', []) if isinstance(ref_data, dict) else ref_data
             
-        # 2. Generate
+        # 2. Compile Prompt with Identity Lock logic
+        char_spec = load_yaml(CHAR_SPEC_PATH)
+        prompt = compile_prompt(char_spec, bench, references=ref_set)
+        
+        # 3. Generate
         gen_result = generator.generate(prompt, ref_set)
         image_url = gen_result['image_url']
         case_scores = gen_result.get('scores', {})

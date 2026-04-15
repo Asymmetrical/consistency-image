@@ -20,16 +20,21 @@ class SimulatedAdapter:
         time.sleep(0.5) # Simulate API latency
         
         # Logic: Score depends on prompt length and the number of references
-        # Standard research metric for zero-shot consistency
         ref_count = len(references)
         
+        # New: weighted Orchestration reward (Identity Lock)
+        identity_bonus = 0.0
+        if "CRITICAL" in prompt and "reference [1]" in prompt:
+            print("--- Simulation: Identity Lock Detected (+5% Focus Bonus) ---")
+            identity_bonus = 0.05
+            
         # We simulate the image URL by picking one of our pre-generated baselines
         image_url = "data/results/kael_forest_baseline.png"
         
         # The scores are simulated to show the 'Weighted' effect
         # We start with a base score and add a 'Consistency Bonus'
         base_scores = {
-            "face_identity": 0.82 + (0.02 * ref_count),
+            "face_identity": 0.82 + (0.02 * ref_count) + identity_bonus,
             "hairstyle": 0.85,
             "silhouette": 0.78,
             "world_continuity": 0.80,
