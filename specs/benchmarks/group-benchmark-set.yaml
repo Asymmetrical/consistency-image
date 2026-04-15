@@ -1,0 +1,13 @@
+- id: bench-dnd-party-dragon
+  character_id: kael
+  ref_strategy: weighted
+  references:
+    - data/characters/kael/ref_01.png # [1]
+    - data/characters/party/elara_anchor.png # [2]
+    - data/characters/party/thorn_anchor.png # [3]
+    - data/characters/party/nyx_anchor.png # [4]
+  task_prompt: "A cinematic group shot in a massive dark cavern. A colossal ancient red dragon looming over four adventurers. In the center, Kael [1] the ranger draws his green-wood bow. To his left, Elara [2] the mage raises her glowing sapphire staff. Guarding them, Thorn [3] the warrior raises his battle-worn tower shield. In the shadows, Nyx [4] the rogue crouches with dual daggers. High fantasy epic style, dramatic cave lighting, masterpiece."
+  expected_invariants:
+    - multi_character_consistency
+    - no_feature_leakage
+  evaluation_profile: default-character-v1

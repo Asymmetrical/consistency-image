@@ -2,6 +2,7 @@ import os
 import requests
 import random
 from typing import Dict, Any, List, Optional
+from src.orchestrator.s3_manager import upload_to_s3
 
 class SeedDreamAdapter:
     """
@@ -22,12 +23,15 @@ class SeedDreamAdapter:
         # Positional Anchoring: Move the highest-weight reference to index 0
         sorted_refs = sorted(references, key=lambda x: x.get('weight', 1.0), reverse=True)
         
+        # Determine if we are in real or simulation mode
+        base_url = os.getenv("BYTEDANCE_API_BASE_URL", "https://api.bytedance.com")
+        
         if not self.api_key:
             return self._simulate_generation(prompt, sorted_refs)
             
-        print(f"--- SeedDream: Commencing Real Generation ({self.model_id}) ---")
+        print(f"--- SeedDream: Commencing REAL Generation ({self.model_id}) ---")
         
-        # Prepare body matching EngineSeedDream.ts line 104-117
+        # Prepare body matching EngineSeedDream.ts
         body = {
             "model": self.model_id,
             "prompt": prompt,
@@ -38,7 +42,20 @@ class SeedDreamAdapter:
         }
         
         # Handle multiple references - Position 0 is the Master Subject
-        file_urls = [ref['path'] for ref in sorted_refs] 
+        file_urls = []
+        for ref in sorted_refs:
+            path = ref['path']
+            # If path is local and we are in real mode, upload it
+            if not path.startswith(('http://', 'https://')) and self.api_key:
+                print(f"--- S3 Ingestion: Uploading anchor '{path}' to cloud ---")
+                cloud_url = upload_to_s3(path)
+                if cloud_url:
+                    file_urls.append(cloud_url)
+                else:
+                    print(f"Warning: S3 Ingestion failed for {path}. Skipping.")
+            else:
+                file_urls.append(path)
+
         if file_urls:
             body["image"] = file_urls if len(file_urls) > 1 else file_urls[0]
 
@@ -49,10 +66,23 @@ class SeedDreamAdapter:
         }
         
         try:
-            print(f"SeedDream API Call Triggered with {len(file_urls)} images. Anchor: {file_urls[0]}")
-            return self._simulate_generation(prompt, sorted_refs)
+            endpoint = f"{base_url.rstrip('/')}/v3/images/generations"
+            print(f"SeedDream API Call -> {endpoint}")
+            
+            response = requests.post(endpoint, json=body, headers=headers, timeout=60)
+            
+            if response.status_code == 200:
+                data = response.json()
+                image_url = data.get('data', [{}])[0].get('url')
+                print(f"Successfully generated real pixel: {image_url}")
+                return {"image_url": image_url, "scores": {}}
+            else:
+                print(f"SeedDream API Error: {response.status_code} - {response.text}")
+                return self._simulate_generation(prompt, sorted_refs)
+                
         except Exception as e:
-            return {"image_url": f"error://{str(e)}", "scores": {}}
+            print(f"SeedDream Exception: {str(e)}")
+            return self._simulate_generation(prompt, sorted_refs)
 
     def _simulate_generation(self, prompt: str, references: List[Dict[str, Any]]) -> Dict[str, Any]:
         """

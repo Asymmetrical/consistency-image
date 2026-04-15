@@ -37,12 +37,17 @@ data/results/*.tsv
 data/results/*.json
 !data/results/current_baseline.json
 
-# Image Cache
+# Image Cache (Allow reports and research assets)
 artifacts/
 *.png
 *.jpg
 *.jpeg
 *.webp
+!reports/assets/*.png
+!reports/assets/*.jpg
+!reports/assets/*.jpeg
+!research/**/*.png
+!research/**/*.jpg
 
 # IDEs
 .vscode/
@@ -51,4 +56,4 @@ artifacts/
 *.swo
 
 # External Repos
-virtuall-monorepo-develop/
+/virtuall-monorepo-develop/

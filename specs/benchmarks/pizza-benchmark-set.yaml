@@ -1,0 +1,30 @@
+- id: bench-ikea-pizza-countertop
+  product_id: ikea-pizz-01
+  references:
+    - data/products/ikea_pizza/ref_anchor.png
+  task_prompt: "The artisan pizza sitting on a clean white IKEA-style stone countertop, high-key natural window light, minimalist kitchen background"
+  expected_invariants:
+    - crust_bubbles
+    - topping_layout
+    - balsamic_swirl
+  evaluation_profile: default-character-v1 # We'll re-use the format
+
+- id: bench-ikea-pizza-wood-table
+  product_id: ikea-pizz-01
+  references:
+    - data/products/ikea_pizza/ref_anchor.png
+  task_prompt: "The artisan pizza on a raw dark wood dining table, moody dim lighting, warm candle glow in background, cozy restaurant atmosphere"
+  expected_invariants:
+    - crust_bubbles
+    - topping_layout
+  evaluation_profile: default-character-v1
+
+- id: bench-ikea-pizza-picnic
+  product_id: ikea-pizz-01
+  references:
+    - data/products/ikea_pizza/ref_anchor.png
+  task_prompt: "The artisan pizza on a red checkered picnic blanket on green grass, bright direct sunlight, vibrant colors, summer park atmosphere"
+  expected_invariants:
+    - crust_bubbles
+    - topping_layout
+  evaluation_profile: default-character-v1

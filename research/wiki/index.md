@@ -1,5 +1,20 @@
 # Character Consistency Lab - Research Wiki
 
+## Research Stages
+
+### Phase 1: Simulation & Discovery (COMPLETE)
+Initial benchmarking of consistency strategies in simulated environments.
+- [Stage 1 Conclusion](simulation-stage-conclusion.md)
+- [Multi-Reference Conditioning](multi-reference-conditioning.md)
+
+### Phase 2: Production Activation (COMPLETE)
+Validation of consistency models on live Virtuall infrastructure with real pixels.
+- [Stage 2: Production Activation](stage-2-production-activation.md)
+- [Image Consistency Report (Final)](../../reports/Image_Consistency_Report_Final.md)
+
+### Phase 3: Video Continuity (UPCOMING)
+Temporal consistency across frame sequences for video production.
+
 ## [STAGE 1] Simulation & Logic (COMPLETED)
 The foundational stage focused on building the "Digital Twin" lab and validating orchestration logic.
 

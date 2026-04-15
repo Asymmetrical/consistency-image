@@ -1,0 +1,10 @@
+id: ikea-pizz-01
+name: "Artisan Sourdough Specialty Pizza"
+visual_anchors:
+  crust: "Hand-stretched sourdough with significant bubbling and dark 'leopard' charred spots (leopard spotting)."
+  toppings: "Large central creamy burrata ball, fresh whole basil leaves, thin strips of dark red speck, and a swirl of dark balsamic glaze."
+  shape: "Slightly irregular organic circle, rustic appearance."
+  lighting_invariants:
+    - highlight_on_oil: true
+    - matte_look_on_dough: true
+style_preset: "High-end commercial food photography, IKEA-style clean composition."

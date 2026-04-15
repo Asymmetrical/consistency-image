@@ -1,0 +1,26 @@
+id: dnd-party-v1
+name: "The Vanguard of the Rift"
+members:
+  - id: kael
+    name: "Kael the Ranger"
+    style_anchor: "data/characters/kael/ref_01.png"
+    visual_anchors: "Rugged man in green leather, long dark hair, sharp features."
+    slot_id: 1
+
+  - id: elara
+    name: "Elara the Mage"
+    style_anchor: "data/characters/party/elara_anchor.png"
+    visual_anchors: "Regal woman with glowing silver hair, ornate blue silk robes, silver staff with a pulsing sapphire."
+    slot_id: 2
+
+  - id: thorn
+    name: "Thorn the Warrior"
+    style_anchor: "data/characters/party/thorn_anchor.png"
+    visual_anchors: "Massive man in battle-worn black plate armor, scarred jawline, holding a tower shield and a broadsword."
+    slot_id: 3
+
+  - id: nyx
+    name: "Nyx the Rogue"
+    style_anchor: "data/characters/party/nyx_anchor.png"
+    visual_anchors: "Slender athletic woman in dark grey hooded leather, dual daggers on hips, green eyes visible under hood."
+    slot_id: 4
