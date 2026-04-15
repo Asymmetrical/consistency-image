@@ -1,23 +1,33 @@
-# Wiki Index
+# Character Consistency Lab - Research Wiki
 
-A catalog of all knowledge in the Research Wiki.
+## [STAGE 1] Simulation & Logic (COMPLETED)
+The foundational stage focused on building the "Digital Twin" lab and validating orchestration logic.
 
-## Sources
-- [FLUX.2 Research Summary](flux-2-research-summary.md)
+### 🌟 Synthesis & Conclusions
+- **[MASTER CONCLUSION: The Parity Blueprint](simulation-stage-conclusion.md)**
+- **[Platform Integration Audit (Blocker Report)](../../platform_integration_audit.md)**
+
+### 🔬 Core Experiments (Weighted Logic)
+- [Experiment #7: SeedDream Synergy & Positional Anchoring](experiment-005-order-sensitivity.md) *(Updated with Synergy findings)*
+- [Experiment #6: LoRA vs. Multi-Reference Hybrid](experiment-006-lora-hybrid.md)
+- [Experiment #3: Reference Strategy Weighting](experiment-003-reference-weighting.md)
+
+### 📚 Foundational Research
+- [Experiment #1: Prompt Specification Header](experiment-001-prompt-restructuring.md)
+- [Experiment #4: Minimum Viable Reference Set (MVRS)](experiment-004-mvrs-testing.md)
+- [Experiment #2: Reference Set Diversity](experiment-002-reference-diversity.md)
+
+---
+
+## [STAGE 2] Real-Pixel Validation (PENDING)
+This stage will stress-test our blueprints against live inference.
+
+- **Upcoming**: [Imagen 3 (Vertex) Consistency Validation]
+- **Upcoming**: [SeedDream (ByteDance) Aesthetic Drift Analysis]
+
+---
 
 ## Entities & Models
+- [Gemini 3 (Nano Banana) - Google DeepMind](nano-banana-overview.md)
+- [SeedDream - ByteDance](gemini-3-reasoning-engine.md)
 - [FLUX.2 - Black Forest Labs](flux-2-overview.md)
-- [Nano Banana (Gemini 3) - Google DeepMind](nano-banana-overview.md)
-- [Gemini 3 Reasoning Engine](gemini-3-reasoning-engine.md)
-- [FLUX.2 Variants](flux-2-variants.md)
-
-## Concepts
-- [Multi-Reference Conditioning](multi-reference-conditioning.md)
-
-## Synthesis & Reports
-- [Experiment #1: Prompt Specification Header](experiment-001-prompt-restructuring.md)
-- [Experiment #2: Reference Set Diversity](experiment-002-reference-diversity.md)
-- [Experiment #3: Reference Strategy Weighting](experiment-003-reference-weighting.md)
-- [Experiment #4: Minimum Viable Reference Set](experiment-004-mvrs-testing.md)
-- [Experiment #5: Reference Order Sensitivity](experiment-005-order-sensitivity.md)
-- [Experiment #6: LoRA vs. Multi-Reference Hybrid](experiment-006-lora-hybrid.md)
